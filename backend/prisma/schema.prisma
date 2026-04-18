@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Status {
+  scheduled
+  confirmed
+  pending
+  canceled
+  done
+}
+
+model User {
+  id       String @id @default(uuid())
+  name     String
+  email    String @unique
+  password String
+}
+
+model Client {
+  id           String        @id @default(uuid())
+  name         String
+  email        String
+  phone        String
+  appointments Appointment[]
+}
+
+model Appointment {
+  id        String   @id @default(uuid())
+  date      DateTime
+  status    Status   @default(scheduled)
+
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id])
+}
+
+model BlockedTime {
+  id    String   @id @default(uuid())
+  start DateTime
+  end   DateTime
+}
