@@ -1,63 +1,86 @@
 import { useEffect, useState } from "react";
-import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import timeGridPlugin from "@fullcalendar/timegrid";
-import interactionPlugin from "@fullcalendar/interaction";
-import api from "../services/api";
+import AppointmentForm from "../components/appointments/AppointmentForm";
+import AppointmentCalendar from "../components/appointments/AppointmentCalendar";
+import BlockedTimeForm from "../components/appointments/BlockedTimeForm";
+import BlockedTimeList from "../components/appointments/BlockedTimeList";
+import {
+  getAppointments,
+  createAppointment
+} from "../services/appointmentService";
+import { getClients } from "../services/clientService";
 
-const statusColors = {
-  scheduled: "#2196f3",
-  confirmed: "#4caf50",
-  pending: "#ff9800",
-  canceled: "#f44336",
-  done: "#9e9e9e"
-};
-
+import { mapAppointmentsToEvents } from "../utils/appointmentMapper";
+import { getBlockedTimes,createBlockedTime } from "../services/blockedTime.service";
 export default function CalendarPage() {
   const [events, setEvents] = useState([]);
+  const [clients, setClients] = useState([]);
+  const [blockedTimes, setBlockedTimes] = useState([]);
 
-  const fetchAppointments = async () => {
+  const loadData = async () => {
     try {
-      const response = await api.get("/appointments");
+      const [appointmentsResponse, clientsResponse, blockedTimesResponse] =
+        await Promise.all([
+          getAppointments(),
+          getClients(),
+          getBlockedTimes()
+        ]);
 
-      const formattedEvents = response.data.map((appointment) => ({
-        id: appointment.id,
-        title: appointment.client?.name || "Sem nome",
-        start: appointment.date,
-        color: statusColors[appointment.status] || "#2196f3",
-        extendedProps: {
-          status: appointment.status,
-          email: appointment.client?.email,
-          phone: appointment.client?.phone
-        }
-      }));
-
-      setEvents(formattedEvents);
+      setEvents(mapAppointmentsToEvents(appointmentsResponse.data));
+      setClients(clientsResponse.data);
+      setBlockedTimes(blockedTimesResponse.data);
     } catch (error) {
-      console.error("Erro ao buscar agendamentos:", error);
+      console.error("Erro ao carregar dados:", error);
+    }
+  };
+
+  const handleCreateAppointment = async (formData) => {
+    try {
+      await createAppointment(formData);
+      await loadData();
+      alert("Agendamento criado com sucesso");
+    } catch (error) {
+      console.error("Erro ao criar agendamento:", error);
+
+      const message =
+        error.response?.data?.error || "Erro ao criar agendamento";
+
+      alert(message);
+    }
+  };
+
+  const handleCreateBlockedTime = async (formData) => {
+    try {
+      await createBlockedTime(formData);
+      await loadData();
+      alert("Bloqueio criado com sucesso");
+    } catch (error) {
+      console.error("Erro ao criar bloqueio:", error);
+
+      const message =
+        error.response?.data?.error || "Erro ao criar bloqueio";
+
+      alert(message);
     }
   };
 
   useEffect(() => {
-    fetchAppointments();
+    loadData();
   }, []);
 
   return (
     <div style={{ padding: "20px" }}>
       <h1>Agenda de Atendimentos</h1>
 
-      <FullCalendar
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-        initialView="dayGridMonth"
-        locale="pt-br"
-        headerToolbar={{
-          left: "prev,next today",
-          center: "title",
-          right: "dayGridMonth,timeGridWeek,timeGridDay"
-        }}
-        events={events}
-        height="auto"
+      <AppointmentForm
+        clients={clients}
+        onSubmit={handleCreateAppointment}
       />
+
+      <BlockedTimeForm onSubmit={handleCreateBlockedTime} />
+
+      <BlockedTimeList blockedTimes={blockedTimes} />
+
+      <AppointmentCalendar events={events} />
     </div>
   );
 }

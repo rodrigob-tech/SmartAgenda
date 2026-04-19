@@ -47,7 +47,7 @@ export const createAppointment = async (req, res) => {
         error: "date e clientId são obrigatórios"
       });
     }
-
+    const appointmentDate = new Date(date);   
     const clientExists = await prisma.client.findUnique({
       where: { id: clientId }
     });
@@ -55,7 +55,22 @@ export const createAppointment = async (req, res) => {
     if (!clientExists) {
       return res.status(404).json({ error: "Cliente não encontrado" });
     }
-    
+    const blockedTime = await prisma.blockedTime.findFirst({
+      where: {
+        start: {
+          lte: appointmentDate
+        },
+        end: {
+          gte: appointmentDate
+        }
+      }
+    });
+
+    if (blockedTime) {
+      return res.status(400).json({
+        error: "Este horário está bloqueado"
+      });
+    }
     const appointment = await prisma.appointment.create({
       data: {
         date: new Date(date),
