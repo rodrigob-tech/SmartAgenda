@@ -18,11 +18,12 @@ export default function AppointmentList({ appointments, onDelete, onEdit }) {
                 flexWrap: "wrap"
               }}
             >
-              <span>
-                Cliente: {appointment.client?.name || "Sem nome"} | Data:{" "}
-                {new Date(appointment.date).toLocaleString("pt-BR")} | Status:{" "}
-                {appointment.status}
-              </span>
+             <span>
+              Cliente: {appointment.client?.name || "Sem nome"} | Espaço:{" "}
+              {appointment.space?.name || "Sem espaço"} | Data:{" "}
+              {new Date(appointment.date).toLocaleString("pt-BR")} | Status:{" "}
+              {appointment.status}
+             </span>
 
               <button onClick={() => onEdit(appointment)}>Editar</button>
               <button onClick={() => onDelete(appointment.id)}>Excluir</button>

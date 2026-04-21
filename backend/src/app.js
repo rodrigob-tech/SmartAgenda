@@ -3,6 +3,8 @@ import cors from "cors";
 import clientRoutes from "./routes/client.routes.js";
 import appointmentRoutes from "./routes/appointment.routes.js";
 import blockedTimeRoutes from "./routes/blockedTime.routes.js";
+import spaceRoutes from "./routes/space.routes.js";
+
 
 const app = express();
 
@@ -16,5 +18,6 @@ app.get("/", (req, res) => {
 app.use("/clients", clientRoutes);
 app.use("/appointments", appointmentRoutes);
 app.use("/blocked-times", blockedTimeRoutes);
+app.use("/spaces", spaceRoutes);
 
 export default app;

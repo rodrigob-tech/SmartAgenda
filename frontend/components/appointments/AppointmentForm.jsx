@@ -16,12 +16,14 @@ function formatDateTimeLocal(dateString) {
 
 export default function AppointmentForm({
   clients,
+  spaces,
   onSubmit,
   editingAppointment,
   onCancelEdit
 }) {
   const [formData, setFormData] = useState({
     clientId: "",
+    spaceId: "",
     date: "",
     status: "scheduled"
   });
@@ -30,12 +32,14 @@ export default function AppointmentForm({
     if (editingAppointment) {
       setFormData({
         clientId: editingAppointment.clientId || "",
+        spaceId: editingAppointment.spaceId || "",
         date: formatDateTimeLocal(editingAppointment.date),
         status: editingAppointment.status || "scheduled"
       });
     } else {
       setFormData({
         clientId: "",
+        spaceId: "",
         date: "",
         status: "scheduled"
       });
@@ -59,6 +63,7 @@ export default function AppointmentForm({
     if (!editingAppointment) {
       setFormData({
         clientId: "",
+        spaceId: "",
         date: "",
         status: "scheduled"
       });
@@ -92,6 +97,19 @@ export default function AppointmentForm({
         ))}
       </select>
 
+      <select
+        name="spaceId"
+        value={formData.spaceId}
+        onChange={handleChange}
+      >
+        <option value="">Sem espaço definido</option>
+        {spaces.map((space) => (
+          <option key={space.id} value={space.id}>
+            {space.name}
+          </option>
+        ))}
+      </select>
+
       <input
         type="datetime-local"
         name="date"
@@ -103,8 +121,8 @@ export default function AppointmentForm({
       <select
         name="status"
         value={formData.status}
-        onChange={handleChange}
-      >
+        onChange={handleChange} required
+      > <option value="">Selecione um espaço</option>
         {STATUS_OPTIONS.map((status) => (
           <option key={status} value={status}>
             {status}

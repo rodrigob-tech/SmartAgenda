@@ -30,6 +30,14 @@ model Client {
   appointments Appointment[]
 }
 
+model Space {
+  id           String        @id @default(uuid())
+  name         String
+  description  String?
+  appointments Appointment[]
+  
+}
+
 model Appointment {
   id        String   @id @default(uuid())
   date      DateTime
@@ -37,6 +45,9 @@ model Appointment {
 
   clientId  String
   client    Client   @relation(fields: [clientId], references: [id])
+
+  spaceId   String?
+  space     Space?   @relation(fields: [spaceId], references: [id])
 }
 
 model BlockedTime {

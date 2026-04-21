@@ -4,7 +4,8 @@ export const getAppointments = async (req, res) => {
   try {
     const appointments = await prisma.appointment.findMany({
       include: {
-        client: true
+        client: true,
+        space:  true
       },
       orderBy: {
         date: "asc"
@@ -24,7 +25,8 @@ export const getAppointmentById = async (req, res) => {
     const appointment = await prisma.appointment.findUnique({
       where: { id },
       include: {
-        client: true
+        client: true,
+        space:  true
       }
     });
 
@@ -37,17 +39,18 @@ export const getAppointmentById = async (req, res) => {
     res.status(500).json({ error: "Erro ao buscar agendamento" });
   }
 };
-
 export const createAppointment = async (req, res) => {
   try {
-    const { date, status, clientId } = req.body;
+    const { date, status, clientId, spaceId } = req.body;
 
-    if (!date || !clientId) {
+    if (!date || !clientId || !spaceId) {
       return res.status(400).json({
-        error: "date e clientId são obrigatórios"
+        error: "date, clientId e spaceId são obrigatórios"
       });
     }
-    const appointmentDate = new Date(date);   
+
+    const appointmentDate = new Date(date);
+
     const clientExists = await prisma.client.findUnique({
       where: { id: clientId }
     });
@@ -55,6 +58,17 @@ export const createAppointment = async (req, res) => {
     if (!clientExists) {
       return res.status(404).json({ error: "Cliente não encontrado" });
     }
+
+    if (spaceId) {
+      const spaceExists = await prisma.space.findUnique({
+        where: { id: spaceId }
+      });
+
+      if (!spaceExists) {
+        return res.status(404).json({ error: "Espaço não encontrado" });
+      }
+    }
+
     const blockedTime = await prisma.blockedTime.findFirst({
       where: {
         start: {
@@ -71,27 +85,45 @@ export const createAppointment = async (req, res) => {
         error: "Este horário está bloqueado"
       });
     }
+     if (spaceId) {
+        const conflictingAppointment = await prisma.appointment.findFirst({
+          where: {
+            date: appointmentDate,
+            spaceId: spaceId
+          }
+        });
+
+        if (conflictingAppointment) {
+          return res.status(400).json({
+            error: "Já existe um agendamento neste horário para este espaço"
+          });
+        }
+      }
+    
+
     const appointment = await prisma.appointment.create({
       data: {
-        date: new Date(date),
+        date: appointmentDate,
         status: status || "scheduled",
-        clientId
+        clientId,
+        // tava spaceId: spaceId
+        spaceId
       },
       include: {
-        client: true
+        client: true,
+        space: true
       }
     });
-
+     
     res.status(201).json(appointment);
   } catch (error) {
     res.status(500).json({ error: "Erro ao criar agendamento" });
   }
 };
-
 export const updateAppointment = async (req, res) => {
   try {
     const { id } = req.params;
-    const { date, status, clientId } = req.body;
+    const { date, status, clientId, spaceId } = req.body;
 
     const appointmentExists = await prisma.appointment.findUnique({
       where: { id }
@@ -111,15 +143,54 @@ export const updateAppointment = async (req, res) => {
       }
     }
 
+    if (spaceId) {
+      const spaceExists = await prisma.space.findUnique({
+        where: { id: spaceId }
+      });
+
+      if (!spaceExists) {
+        return res.status(404).json({ error: "Espaço não encontrado" });
+      }
+    }
+
+    const finalDate = date ? new Date(date) : appointmentExists.date;
+    const finalSpaceId =
+      spaceId !== undefined ? (spaceId || null) : appointmentExists.spaceId;
+    if (!finalSpaceId) {
+      return res.status(400).json({
+        error: "spaceId é obrigatório"
+      });
+    }
+    
+    if (finalSpaceId) {
+      const conflictingAppointment = await prisma.appointment.findFirst({
+        where: {
+          id: {
+            not: id
+          },
+          date: finalDate,
+          spaceId: finalSpaceId
+        }
+      });
+
+      if (conflictingAppointment) {
+        return res.status(400).json({
+          error: "Já existe um agendamento neste horário para este espaço"
+        });
+      }
+    }
+
     const updatedAppointment = await prisma.appointment.update({
       where: { id },
       data: {
         ...(date && { date: new Date(date) }),
         ...(status && { status }),
-        ...(clientId && { clientId })
+        ...(clientId && { clientId }),
+        ...(spaceId !== undefined && { spaceId: spaceId || null })
       },
       include: {
-        client: true
+        client: true,
+        space: true
       }
     });
 
@@ -128,7 +199,6 @@ export const updateAppointment = async (req, res) => {
     res.status(500).json({ error: "Erro ao atualizar agendamento" });
   }
 };
-
 export const deleteAppointment = async (req, res) => {
   try {
     const { id } = req.params;
