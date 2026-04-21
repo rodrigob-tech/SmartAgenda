@@ -24,6 +24,13 @@ import {
   deleteSpace
 } from "../services/spaceService";
 
+
+
+
+
+
+
+
 export default function CalendarPage() {
   const [events, setEvents] = useState([]);
   const [clients, setClients] = useState([]);
@@ -33,6 +40,7 @@ export default function CalendarPage() {
   const [spaces, setSpaces] = useState([]);
   const [editingSpace, setEditingSpace] = useState(null);
 
+// ===== load data =====
 const loadData = async () => {
   try {
     const [
@@ -59,6 +67,7 @@ const loadData = async () => {
     console.error("Erro ao carregar dados:", error);
   }
 };
+  // ===== appointment handlers =====
   const handleSubmitAppointment = async (formData) => {
   try {
     if (editingAppointment) {
@@ -80,7 +89,56 @@ const loadData = async () => {
     alert(message);
   }
   };
+  
+  const handleDeleteAppointment = async (id) => {
+  try {
+    const confirmed = window.confirm("Deseja realmente excluir este agendamento?");
+    if (!confirmed) return;
+    await deleteAppointment(id);
+    await loadData();
+    alert("Agendamento removido com sucesso");
+  } catch (error) {
+    console.error("Erro ao remover agendamento:", error);
 
+    const message =
+      error.response?.data?.error || "Erro ao remover agendamento";
+
+    alert(message);
+  }
+  };
+  // ===== blocked time handlers =====
+  const handleCreateBlockedTime = async (formData) => {
+    try {
+      await createBlockedTime(formData);
+      await loadData();
+      alert("Bloqueio criado com sucesso");
+    } catch (error) {
+      console.error("Erro ao criar bloqueio:", error);
+
+      const message =
+        error.response?.data?.error || "Erro ao criar bloqueio";
+
+      alert(message);
+    }
+  };
+  const handleDeleteBlockedTime = async (id) => {
+  try {
+    const confirmed = window.confirm("Deseja realmente excluir este agendamento?");
+    if (!confirmed) return;
+    await deleteBlockedTime(id);
+    await loadData();
+    alert("Bloqueio removido com sucesso");
+  } catch (error) {
+    console.error("Erro ao remover bloqueio:", error);
+
+    const message =
+      error.response?.data?.error || "Erro ao remover bloqueio";
+
+    alert(message);
+  }
+  };
+  
+  // ===== space handlers =====
   const handleSubmitSpace = async (formData) => {
   try {
     if (editingSpace) {
@@ -102,51 +160,10 @@ const loadData = async () => {
     alert(message);
   }
   };
-
-  const handleDeleteAppointment = async (id) => {
-  try {
-    await deleteAppointment(id);
-    await loadData();
-    alert("Agendamento removido com sucesso");
-  } catch (error) {
-    console.error("Erro ao remover agendamento:", error);
-
-    const message =
-      error.response?.data?.error || "Erro ao remover agendamento";
-
-    alert(message);
-  }
-  };
-  const handleCreateBlockedTime = async (formData) => {
-    try {
-      await createBlockedTime(formData);
-      await loadData();
-      alert("Bloqueio criado com sucesso");
-    } catch (error) {
-      console.error("Erro ao criar bloqueio:", error);
-
-      const message =
-        error.response?.data?.error || "Erro ao criar bloqueio";
-
-      alert(message);
-    }
-  };
-  const handleDeleteBlockedTime = async (id) => {
-  try {
-    await deleteBlockedTime(id);
-    await loadData();
-    alert("Bloqueio removido com sucesso");
-  } catch (error) {
-    console.error("Erro ao remover bloqueio:", error);
-
-    const message =
-      error.response?.data?.error || "Erro ao remover bloqueio";
-
-    alert(message);
-  }
-  };
   const handleDeleteSpace = async (id) => {
   try {
+    const confirmed = window.confirm("Deseja realmente excluir este agendamento?");
+    if (!confirmed) return;
     await deleteSpace(id);
     await loadData();
     alert("Espaço removido com sucesso");
@@ -159,6 +176,8 @@ const loadData = async () => {
     alert(message);
   }
   };
+
+
   useEffect(() => {
     loadData();
   }, []);

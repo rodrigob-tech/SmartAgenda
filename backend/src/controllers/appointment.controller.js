@@ -1,5 +1,5 @@
 import prisma from "../prisma/client.js";
-
+import { sendEmail } from "../services/email.service.js";
 export const getAppointments = async (req, res) => {
   try {
     const appointments = await prisma.appointment.findMany({
@@ -42,15 +42,23 @@ export const getAppointmentById = async (req, res) => {
 export const createAppointment = async (req, res) => {
   try {
     const { date, status, clientId, spaceId } = req.body;
-
     if (!date || !clientId || !spaceId) {
       return res.status(400).json({
         error: "date, clientId e spaceId são obrigatórios"
       });
     }
+    const validStatuses = ["scheduled", "confirmed", "pending", "canceled", "done"];
+
+    if (status && !validStatuses.includes(status)) {
+      return res.status(400).json({ error: "Status inválido" });
+    }
+    
 
     const appointmentDate = new Date(date);
 
+    if (isNaN(appointmentDate.getTime())) {
+     return res.status(400).json({ error: "Data inválida" });
+}
     const clientExists = await prisma.client.findUnique({
       where: { id: clientId }
     });
@@ -114,6 +122,22 @@ export const createAppointment = async (req, res) => {
         space: true
       }
     });
+    try{
+
+      if (appointment.client?.email) {
+        await sendEmail({
+          to: appointment.client.email,
+          subject: "Agendamento confirmado",
+          text: `Olá, ${appointment.client.name}. Seu agendamento foi criado para ${new Date(
+            appointment.date
+          ).toLocaleString("pt-BR")}. Espaço: ${
+            appointment.space?.name || "Não informado"
+          }. Status: ${appointment.status}.`
+        });
+      }
+    } catch (emailError) {
+  console.error("Erro ao enviar email de criação:", emailError);
+}
      
     res.status(201).json(appointment);
   } catch (error) {
