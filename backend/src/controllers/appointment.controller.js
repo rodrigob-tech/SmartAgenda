@@ -1,11 +1,15 @@
 import prisma from "../prisma/client.js";
 import { sendEmail } from "../services/email.service.js";
+import { createGoogleCalendarEvent,
+         updateGoogleCalendarEvent,
+         deleteGoogleCalendarEvent
+ } from "../services/googleCalendar.service.js";
 export const getAppointments = async (req, res) => {
   try {
     const appointments = await prisma.appointment.findMany({
       include: {
         client: true,
-        space:  true
+        space: true
       },
       orderBy: {
         date: "asc"
@@ -26,7 +30,7 @@ export const getAppointmentById = async (req, res) => {
       where: { id },
       include: {
         client: true,
-        space:  true
+        space: true
       }
     });
 
@@ -52,13 +56,13 @@ export const createAppointment = async (req, res) => {
     if (status && !validStatuses.includes(status)) {
       return res.status(400).json({ error: "Status inválido" });
     }
-    
+
 
     const appointmentDate = new Date(date);
 
     if (isNaN(appointmentDate.getTime())) {
-     return res.status(400).json({ error: "Data inválida" });
-}
+      return res.status(400).json({ error: "Data inválida" });
+    }
     const clientExists = await prisma.client.findUnique({
       where: { id: clientId }
     });
@@ -93,21 +97,21 @@ export const createAppointment = async (req, res) => {
         error: "Este horário está bloqueado"
       });
     }
-     if (spaceId) {
-        const conflictingAppointment = await prisma.appointment.findFirst({
-          where: {
-            date: appointmentDate,
-            spaceId: spaceId
-          }
-        });
-
-        if (conflictingAppointment) {
-          return res.status(400).json({
-            error: "Já existe um agendamento neste horário para este espaço"
-          });
+    if (spaceId) {
+      const conflictingAppointment = await prisma.appointment.findFirst({
+        where: {
+          date: appointmentDate,
+          spaceId: spaceId
         }
+      });
+
+      if (conflictingAppointment) {
+        return res.status(400).json({
+          error: "Já existe um agendamento neste horário para este espaço"
+        });
       }
-    
+    }
+
 
     const appointment = await prisma.appointment.create({
       data: {
@@ -122,7 +126,7 @@ export const createAppointment = async (req, res) => {
         space: true
       }
     });
-    try{
+    try {
 
       if (appointment.client?.email) {
         await sendEmail({
@@ -130,16 +134,52 @@ export const createAppointment = async (req, res) => {
           subject: "Agendamento confirmado",
           text: `Olá, ${appointment.client.name}. Seu agendamento foi criado para ${new Date(
             appointment.date
-          ).toLocaleString("pt-BR")}. Espaço: ${
-            appointment.space?.name || "Não informado"
-          }. Status: ${appointment.status}.`
+          ).toLocaleString("pt-BR")}. Espaço: ${appointment.space?.name || "Não informado"
+            }. Status: ${appointment.status}.`
         });
       }
     } catch (emailError) {
-  console.error("Erro ao enviar email de criação:", emailError);
-}
-     
-    res.status(201).json(appointment);
+      console.error("Erro ao enviar email de criação:", emailError);
+    }
+    try {
+      const GOOGLE_OWNER_USER_ID = "826ed888-a76e-41fc-a42f-62a8b0efcaaa";
+
+      const googleEvent = await createGoogleCalendarEvent(
+        GOOGLE_OWNER_USER_ID,
+        appointment
+      );
+
+      await prisma.appointment.update({
+        where: { id: appointment.id },
+        data: {
+          googleEventId: googleEvent.id || null,
+          googleCalendarId: "primary",
+          googleSyncStatus: "synced",
+          googleSyncError: null,
+          syncedAt: new Date()
+        }
+      });
+    } catch (googleError) {
+      console.error("Erro ao sincronizar com Google Calendar:", googleError);
+
+      await prisma.appointment.update({
+        where: { id: appointment.id },
+        data: {
+          googleSyncStatus: "failed",
+          googleSyncError: googleError.message
+        }
+      });
+    }
+
+    const updatedAppointment = await prisma.appointment.findUnique({
+      where: { id: appointment.id },
+      include: {
+        client: true,
+        space: true
+      }
+    });
+
+    res.status(201).json(updatedAppointment);
   } catch (error) {
     res.status(500).json({ error: "Erro ao criar agendamento" });
   }
@@ -150,7 +190,11 @@ export const updateAppointment = async (req, res) => {
     const { date, status, clientId, spaceId } = req.body;
 
     const appointmentExists = await prisma.appointment.findUnique({
-      where: { id }
+      where: { id },
+      include: {
+        client: true,
+        space: true
+      }
     });
 
     if (!appointmentExists) {
@@ -180,28 +224,44 @@ export const updateAppointment = async (req, res) => {
     const finalDate = date ? new Date(date) : appointmentExists.date;
     const finalSpaceId =
       spaceId !== undefined ? (spaceId || null) : appointmentExists.spaceId;
+
     if (!finalSpaceId) {
       return res.status(400).json({
         error: "spaceId é obrigatório"
       });
     }
-    
-    if (finalSpaceId) {
-      const conflictingAppointment = await prisma.appointment.findFirst({
-        where: {
-          id: {
-            not: id
-          },
-          date: finalDate,
-          spaceId: finalSpaceId
-        }
-      });
 
-      if (conflictingAppointment) {
-        return res.status(400).json({
-          error: "Já existe um agendamento neste horário para este espaço"
-        });
+    const blockedTime = await prisma.blockedTime.findFirst({
+      where: {
+        start: {
+          lte: finalDate
+        },
+        end: {
+          gte: finalDate
+        }
       }
+    });
+
+    if (blockedTime) {
+      return res.status(400).json({
+        error: "Este horário está bloqueado"
+      });
+    }
+
+    const conflictingAppointment = await prisma.appointment.findFirst({
+      where: {
+        id: {
+          not: id
+        },
+        date: finalDate,
+        spaceId: finalSpaceId
+      }
+    });
+
+    if (conflictingAppointment) {
+      return res.status(400).json({
+        error: "Já existe um agendamento neste horário para este espaço"
+      });
     }
 
     const updatedAppointment = await prisma.appointment.update({
@@ -218,21 +278,77 @@ export const updateAppointment = async (req, res) => {
       }
     });
 
-    res.json(updatedAppointment);
+    try {
+      const GOOGLE_OWNER_USER_ID = "826ed888-a76e-41fc-a42f-62a8b0efcaaa";
+
+      if (updatedAppointment.googleEventId) {
+        await updateGoogleCalendarEvent(
+          GOOGLE_OWNER_USER_ID,
+          updatedAppointment
+        );
+
+        await prisma.appointment.update({
+          where: { id: updatedAppointment.id },
+          data: {
+            googleSyncStatus: "synced",
+            googleSyncError: null,
+            syncedAt: new Date()
+          }
+        });
+      }
+    } catch (googleError) {
+      console.error("Erro ao atualizar evento no Google Calendar:", googleError);
+
+      await prisma.appointment.update({
+        where: { id: updatedAppointment.id },
+        data: {
+          googleSyncStatus: "failed",
+          googleSyncError: googleError.message
+        }
+      });
+    }
+
+    const finalAppointment = await prisma.appointment.findUnique({
+      where: { id: updatedAppointment.id },
+      include: {
+        client: true,
+        space: true
+      }
+    });
+
+    res.json(finalAppointment);
   } catch (error) {
     res.status(500).json({ error: "Erro ao atualizar agendamento" });
   }
 };
+
 export const deleteAppointment = async (req, res) => {
   try {
     const { id } = req.params;
 
     const appointmentExists = await prisma.appointment.findUnique({
-      where: { id }
+      where: { id },
+      include: {
+        client: true,
+        space: true
+      }
     });
 
     if (!appointmentExists) {
       return res.status(404).json({ error: "Agendamento não encontrado" });
+    }
+
+    try {
+      const GOOGLE_OWNER_USER_ID = "826ed888-a76e-41fc-a42f-62a8b0efcaaa";
+
+      if (appointmentExists.googleEventId) {
+        await deleteGoogleCalendarEvent(
+          GOOGLE_OWNER_USER_ID,
+          appointmentExists
+        );
+      }
+    } catch (googleError) {
+      console.error("Erro ao excluir evento no Google Calendar:", googleError);
     }
 
     await prisma.appointment.delete({
