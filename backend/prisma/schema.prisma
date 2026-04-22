@@ -16,10 +16,16 @@ enum Status {
 }
 
 model User {
-  id       String @id @default(uuid())
-  name     String
-  email    String @unique
-  password String
+  id                    String   @id @default(uuid())
+  name                  String
+  email                 String   @unique
+  password              String
+
+  googleAccessToken     String?
+  googleRefreshToken    String?
+  googleTokenExpiry     DateTime?
+  googleCalendarEmail   String?
+  googleConnected       Boolean  @default(false)
 }
 
 model Client {
@@ -51,7 +57,10 @@ model Appointment {
   space     Space   @relation(fields: [spaceId], references: [id])
 
   googleEventId      String?
-  googleCalendarSync Boolean @default(false)
+  googleCalendarId   String?
+  googleSyncStatus   String?   // ex: pending, synced, failed
+  googleSyncError    String?
+  syncedAt           DateTime?
 }
 
 model BlockedTime {
