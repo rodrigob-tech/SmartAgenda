@@ -113,7 +113,7 @@ const inputStyle = {
 
 const primaryButton = {
   border: "none",
-  background: "#1976d2",
+  background: "#02af11",
   color: "#fff",
   padding: "10px 14px",
   borderRadius: "10px",

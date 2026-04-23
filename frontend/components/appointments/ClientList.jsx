@@ -81,8 +81,8 @@ export default function ClientList({
 
 const editButton = {
   border: "none",
-  background: "#1976d2",
-  color: "#fff",
+  background: "#fffb03",
+  color: "#000000",
   padding: "8px 12px",
   borderRadius: "8px",
   cursor: "pointer",
