@@ -1,11 +1,13 @@
 import api from "./api";
 
-export const getBlockedTimes = () => api.get("/blocked-times");
+export const getBlockedTimes = (headers = {}) =>
+  api.get("/blocked-times", { headers });
 
-export const createBlockedTime = (data) => api.post("/blocked-times", data);
+export const createBlockedTime = (data, headers = {}) =>
+  api.post("/blocked-times", data, { headers });
 
-export const updateBlockedTime = (id, data) =>
-  api.put(`/blocked-times/${id}`, data);
+export const updateBlockedTime = (id, data, headers = {}) =>
+  api.put(`/blocked-times/${id}`, data, { headers });
 
-export const deleteBlockedTime = (id) =>
-  api.delete(`/blocked-times/${id}`);
+export const deleteBlockedTime = (id, headers = {}) =>
+  api.delete(`/blocked-times/${id}`, { headers });

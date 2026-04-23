@@ -4,6 +4,8 @@ import { createGoogleCalendarEvent,
          updateGoogleCalendarEvent,
          deleteGoogleCalendarEvent
  } from "../services/googleCalendar.service.js";
+ import { validatePublicBookingRules } from "../services/availability.service.js";
+
 export const getAppointments = async (req, res) => {
   try {
     const appointments = await prisma.appointment.findMany({
@@ -80,6 +82,7 @@ export const createAppointment = async (req, res) => {
         return res.status(404).json({ error: "Espaço não encontrado" });
       }
     }
+    await validatePublicBookingRules({ date, spaceId });
 
     const blockedTime = await prisma.blockedTime.findFirst({
       where: {
@@ -142,10 +145,10 @@ export const createAppointment = async (req, res) => {
       console.error("Erro ao enviar email de criação:", emailError);
     }
     try {
-      const GOOGLE_OWNER_USER_ID = "826ed888-a76e-41fc-a42f-62a8b0efcaaa";
+      const GOOGLE_OWNER_USER_ID = "2ec5f4e3-6517-4f68-b968-2e496a3eb972";
 
       const googleEvent = await createGoogleCalendarEvent(
-        GOOGLE_OWNER_USER_ID,
+        req.user.userId,
         appointment
       );
 
@@ -279,11 +282,11 @@ export const updateAppointment = async (req, res) => {
     });
 
     try {
-      const GOOGLE_OWNER_USER_ID = "826ed888-a76e-41fc-a42f-62a8b0efcaaa";
+      const GOOGLE_OWNER_USER_ID = "2ec5f4e3-6517-4f68-b968-2e496a3eb972";
 
       if (updatedAppointment.googleEventId) {
         await updateGoogleCalendarEvent(
-          GOOGLE_OWNER_USER_ID,
+          req.user.userId,
           updatedAppointment
         );
 
@@ -339,11 +342,11 @@ export const deleteAppointment = async (req, res) => {
     }
 
     try {
-      const GOOGLE_OWNER_USER_ID = "826ed888-a76e-41fc-a42f-62a8b0efcaaa";
+      const GOOGLE_OWNER_USER_ID = "2ec5f4e3-6517-4f68-b968-2e496a3eb972";
 
       if (appointmentExists.googleEventId) {
         await deleteGoogleCalendarEvent(
-          GOOGLE_OWNER_USER_ID,
+          req.user.userId,
           appointmentExists
         );
       }

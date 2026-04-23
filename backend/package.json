@@ -13,11 +13,13 @@
   "type": "module",
   "dependencies": {
     "@prisma/client": "^6.19.0",
+    "bcrypt": "^6.0.0",
     "bree": "^9.2.9",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "googleapis": "^171.4.0",
+    "jsonwebtoken": "^9.0.3",
     "nodemailer": "^8.0.5"
   },
   "devDependencies": {
