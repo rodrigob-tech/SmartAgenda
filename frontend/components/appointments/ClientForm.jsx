@@ -1,24 +1,29 @@
 import { useEffect, useState } from "react";
 
-export default function SpaceForm({ onSubmit, editingSpace, onCancelEdit }) {
-  const [formData, setFormData] = useState({
-    name: "",
-    description: ""
-  });
+const initialState = {
+  name: "",
+  email: "",
+  phone: ""
+};
+
+export default function ClientForm({
+  onSubmit,
+  editingClient,
+  onCancelEdit
+}) {
+  const [formData, setFormData] = useState(initialState);
 
   useEffect(() => {
-    if (editingSpace) {
+    if (editingClient) {
       setFormData({
-        name: editingSpace.name || "",
-        description: editingSpace.description || ""
+        name: editingClient.name || "",
+        email: editingClient.email || "",
+        phone: editingClient.phone || ""
       });
     } else {
-      setFormData({
-        name: "",
-        description: ""
-      });
+      setFormData(initialState);
     }
-  }, [editingSpace]);
+  }, [editingClient]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -32,36 +37,30 @@ export default function SpaceForm({ onSubmit, editingSpace, onCancelEdit }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     await onSubmit(formData);
-
-    if (!editingSpace) {
-      setFormData({
-        name: "",
-        description: ""
-      });
-    }
   };
+
+  if (!editingClient) {
+    return null;
+  }
 
   return (
     <form
       onSubmit={handleSubmit}
       style={{
         display: "grid",
-        gap: "12px",
-        marginBottom: "20px",
+        gap: "10px",
         padding: "16px",
         background: "#f8faff",
         border: "1px solid #e1e8f5",
         borderRadius: "14px"
       }}
     >
-      <h3 style={{ margin: 0 }}>
-        {editingSpace ? "Editar espaço" : "Novo espaço"}
-      </h3>
+      <h3 style={{ margin: 0 }}>Editar cliente</h3>
 
       <input
         type="text"
         name="name"
-        placeholder="Nome do espaço"
+        placeholder="Nome do cliente"
         value={formData.name}
         onChange={handleChange}
         required
@@ -69,28 +68,37 @@ export default function SpaceForm({ onSubmit, editingSpace, onCancelEdit }) {
       />
 
       <input
-        type="text"
-        name="description"
-        placeholder="Descrição do espaço"
-        value={formData.description}
+        type="email"
+        name="email"
+        placeholder="Email"
+        value={formData.email}
         onChange={handleChange}
+        required
+        style={inputStyle}
+      />
+
+      <input
+        type="text"
+        name="phone"
+        placeholder="Telefone"
+        value={formData.phone}
+        onChange={handleChange}
+        required
         style={inputStyle}
       />
 
       <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
         <button type="submit" style={primaryButton}>
-          {editingSpace ? "Salvar alterações" : "Criar espaço"}
+          Salvar alterações
         </button>
 
-        {editingSpace && (
-          <button
-            type="button"
-            onClick={onCancelEdit}
-            style={secondaryButton}
-          >
-            Cancelar edição
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={onCancelEdit}
+          style={secondaryButton}
+        >
+          Cancelar edição
+        </button>
       </div>
     </form>
   );
@@ -100,13 +108,12 @@ const inputStyle = {
   padding: "12px",
   borderRadius: "10px",
   border: "1px solid #d0d7e2",
-  fontSize: "14px",
-  background: "#fff"
+  fontSize: "14px"
 };
 
 const primaryButton = {
   border: "none",
-  background: "#02af11",
+  background: "#1976d2",
   color: "#fff",
   padding: "10px 14px",
   borderRadius: "10px",

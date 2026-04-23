@@ -57,7 +57,6 @@ export default function AppointmentForm({
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     await onSubmit(formData);
 
     if (!editingAppointment) {
@@ -74,20 +73,25 @@ export default function AppointmentForm({
     <form
       onSubmit={handleSubmit}
       style={{
-        marginBottom: "30px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "10px",
-        maxWidth: "400px"
+        display: "grid",
+        gap: "12px",
+        marginBottom: "20px",
+        padding: "16px",
+        background: "#f8faff",
+        border: "1px solid #e1e8f5",
+        borderRadius: "14px"
       }}
     >
-      <h2>{editingAppointment ? "Editar agendamento" : "Criar agendamento"}</h2>
+      <h3 style={{ margin: 0 }}>
+        {editingAppointment ? "Editar agendamento" : "Novo agendamento"}
+      </h3>
 
       <select
         name="clientId"
         value={formData.clientId}
         onChange={handleChange}
         required
+        style={inputStyle}
       >
         <option value="">Selecione um cliente</option>
         {clients.map((client) => (
@@ -101,8 +105,10 @@ export default function AppointmentForm({
         name="spaceId"
         value={formData.spaceId}
         onChange={handleChange}
+        required
+        style={inputStyle}
       >
-        <option value="">Sem espaço definido</option>
+        <option value="">Selecione um espaço</option>
         {spaces.map((space) => (
           <option key={space.id} value={space.id}>
             {space.name}
@@ -116,13 +122,15 @@ export default function AppointmentForm({
         value={formData.date}
         onChange={handleChange}
         required
+        style={inputStyle}
       />
 
       <select
         name="status"
         value={formData.status}
-        onChange={handleChange} required
-      > <option value="">Selecione um espaço</option>
+        onChange={handleChange}
+        style={inputStyle}
+      >
         {STATUS_OPTIONS.map((status) => (
           <option key={status} value={status}>
             {status}
@@ -130,15 +138,49 @@ export default function AppointmentForm({
         ))}
       </select>
 
-      <button type="submit">
-        {editingAppointment ? "Salvar alterações" : "Criar agendamento"}
-      </button>
-
-      {editingAppointment && (
-        <button type="button" onClick={onCancelEdit}>
-          Cancelar edição
+      <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+        <button type="submit" style={primaryButton}>
+          {editingAppointment ? "Salvar alterações" : "Criar agendamento"}
         </button>
-      )}
+
+        {editingAppointment && (
+          <button
+            type="button"
+            onClick={onCancelEdit}
+            style={secondaryButton}
+          >
+            Cancelar edição
+          </button>
+        )}
+      </div>
     </form>
   );
 }
+
+const inputStyle = {
+  padding: "12px",
+  borderRadius: "10px",
+  border: "1px solid #d0d7e2",
+  fontSize: "14px",
+  background: "#fff"
+};
+
+const primaryButton = {
+  border: "none",
+  background: "#02af11",
+  color: "#fff",
+  padding: "10px 14px",
+  borderRadius: "10px",
+  cursor: "pointer",
+  fontWeight: "600"
+};
+
+const secondaryButton = {
+  border: "1px solid #d0d7e2",
+  background: "#fff",
+  color: "#333",
+  padding: "10px 14px",
+  borderRadius: "10px",
+  cursor: "pointer",
+  fontWeight: "600"
+};

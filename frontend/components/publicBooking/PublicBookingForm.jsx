@@ -1,12 +1,12 @@
+import { getClientData } from "../../src/services/clientAuthStorage";  
 
-
-import { getClientData } from "../../src/services/clientAuthStorage";
 
 export default function PublicBookingForm({
   selectedSlot,
   spaceId,
   spaces,
-  onSubmit
+  onSubmit,
+  submitting = false
 }) {
   const client = getClientData();
 
@@ -28,7 +28,6 @@ export default function PublicBookingForm({
     event.preventDefault();
 
     if (!selectedSlot || !spaceId) {
-      alert("Selecione um espaço e um horário");
       return;
     }
 
@@ -38,37 +37,106 @@ export default function PublicBookingForm({
     });
   };
 
+  const summaryRowStyle = {
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
+    padding: "12px 0",
+    borderBottom: "1px solid #eceff5"
+  };
+
+  const canConfirm = !!selectedSlot && !!spaceId && !submitting;
+
   return (
-    <form
-      onSubmit={handleSubmit}
-      style={{
-        marginTop: "20px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "10px",
-        maxWidth: "500px"
-      }}
-    >
-      <h3>Confirmação do agendamento</h3>
+    <form onSubmit={handleSubmit}>
+      <h2 style={{ marginTop: 0, marginBottom: "8px" }}>Resumo da reserva</h2>
+      <p style={{ marginTop: 0, color: "#666", marginBottom: "20px" }}>
+        Confira os dados antes de confirmar seu atendimento.
+      </p>
 
-      <div>
-        <strong>Espaço:</strong> {selectedSpace?.name || "Não selecionado"}
+      <div
+        style={{
+          background: selectedSlot ? "#f8faff" : "#fafafa",
+          border: "1px solid #e1e8f5",
+          borderRadius: "14px",
+          padding: "18px",
+          opacity: selectedSlot ? 1 : 0.88
+        }}
+      >
+        <div style={summaryRowStyle}>
+          <strong>Cliente</strong>
+          <span>{client?.name || "Não identificado"}</span>
+        </div>
+
+        <div style={summaryRowStyle}>
+          <strong>Email</strong>
+          <span>{client?.email || "Não informado"}</span>
+        </div>
+
+        <div style={summaryRowStyle}>
+          <strong>Telefone</strong>
+          <span>{client?.phone || "Não informado"}</span>
+        </div>
+
+        <div style={summaryRowStyle}>
+          <strong>Espaço</strong>
+          <span>{selectedSpace?.name || "Selecione um espaço"}</span>
+        </div>
+
+        <div style={summaryRowStyle}>
+          <strong>Descrição do espaço</strong>
+          <span>{selectedSpace?.description || "Sem descrição"}</span>
+        </div>
+
+        <div style={summaryRowStyle}>
+          <strong>Data</strong>
+          <span>{formattedDate || "Escolha um horário para exibir a data"}</span>
+        </div>
+
+        <div
+          style={{
+            ...summaryRowStyle,
+            borderBottom: "none"
+          }}
+        >
+          <strong>Horário</strong>
+          <span>{formattedTime || "Nenhum horário selecionado"}</span>
+        </div>
       </div>
 
-      <div>
-        <strong>Descrição do espaço:</strong>{" "}
-        {selectedSpace?.description || "Sem descrição"}
-      </div>
+      {!selectedSlot && (
+        <div
+          style={{
+            marginTop: "14px",
+            background: "#fff8e1",
+            border: "1px solid #ffe082",
+            color: "#8a6d1f",
+            borderRadius: "10px",
+            padding: "12px"
+          }}
+        >
+          Selecione um horário disponível para liberar a confirmação.
+        </div>
+      )}
 
-      <div>
-        <strong>Data:</strong> {formattedDate || "Não selecionada"}
-      </div>
-
-      <div>
-        <strong>Horário:</strong> {formattedTime || "Não selecionado"}
-      </div>
-
-      <button type="submit">Confirmar agendamento</button>
+      <button
+        type="submit"
+        disabled={!canConfirm}
+        style={{
+          marginTop: "20px",
+          width: "100%",
+          border: "none",
+          background: canConfirm ? "#2e7d32" : "#a5d6a7",
+          color: "#fff",
+          padding: "14px",
+          borderRadius: "10px",
+          cursor: canConfirm ? "pointer" : "not-allowed",
+          fontWeight: "700",
+          fontSize: "15px"
+        }}
+      >
+        {submitting ? "Confirmando agendamento..." : "Confirmar agendamento"}
+      </button>
     </form>
   );
 }

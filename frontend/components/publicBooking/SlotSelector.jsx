@@ -1,12 +1,27 @@
 export default function SlotSelector({ slots, selectedSlot, onSelect }) {
   return (
-    <div style={{ marginBottom: "20px" }}>
-      <h3>Horários disponíveis</h3>
+    <div>
+      <h3 style={{ marginTop: 0 }}>Horários disponíveis</h3>
 
       {slots.length === 0 ? (
-        <p>Nenhum horário disponível para a data selecionada.</p>
+        <div
+          style={{
+            padding: "16px",
+            background: "#f8f9fc",
+            borderRadius: "12px",
+            color: "#666"
+          }}
+        >
+          Nenhum horário disponível para a data selecionada.
+        </div>
       ) : (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(110px, 1fr))",
+            gap: "12px"
+          }}
+        >
           {slots.map((slot) => {
             const label = new Date(slot.start).toLocaleTimeString("pt-BR", {
               hour: "2-digit",
@@ -22,11 +37,14 @@ export default function SlotSelector({ slots, selectedSlot, onSelect }) {
                 type="button"
                 onClick={() => onSelect(slot.start)}
                 style={{
-                  padding: "10px 14px",
-                  border: "1px solid #ccc",
+                  padding: "12px",
+                  borderRadius: "10px",
+                  border: isSelected ? "2px solid #1976d2" : "1px solid #d0d7e2",
                   background: isSelected ? "#1976d2" : "#fff",
-                  color: isSelected ? "#fff" : "#000",
-                  cursor: "pointer"
+                  color: isSelected ? "#fff" : "#222",
+                  cursor: "pointer",
+                  fontWeight: "600",
+                  transition: "0.2s ease"
                 }}
               >
                 {label}

@@ -7,6 +7,7 @@ import {
   deleteClient
 } from "../controllers/client.controller.js";
 
+
 const router = Router();
 
 router.get("/", getClients);

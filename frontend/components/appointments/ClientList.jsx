@@ -1,8 +1,9 @@
-export default function BlockedTimeList({
-  blockedTimes,
+export default function ClientList({
+  clients,
+  onEdit,
   onDelete
 }) {
-  if (!blockedTimes?.length) {
+  if (!clients?.length) {
     return (
       <div
         style={{
@@ -12,7 +13,7 @@ export default function BlockedTimeList({
           color: "#666"
         }}
       >
-        Nenhum bloqueio cadastrado.
+        Nenhum cliente cadastrado.
       </div>
     );
   }
@@ -24,41 +25,33 @@ export default function BlockedTimeList({
         gap: "12px"
       }}
     >
-      {blockedTimes.map((blockedTime) => (
+      {clients.map((client) => (
         <div
-          key={blockedTime.id}
+          key={client.id}
           style={{
             border: "1px solid #e5e7eb",
-            borderRadius: "14px",
-            padding: "16px",
+            borderRadius: "12px",
+            padding: "14px",
             background: "#fff"
           }}
         >
           <div style={{ display: "grid", gap: "6px" }}>
             <div>
-              <strong>Início:</strong>{" "}
-              {new Date(blockedTime.start).toLocaleDateString("pt-BR")} às{" "}
-              {new Date(blockedTime.start).toLocaleTimeString("pt-BR", {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: false
-              })}
+              <strong>Nome:</strong> {client.name}
             </div>
 
             <div>
-              <strong>Fim:</strong>{" "}
-              {new Date(blockedTime.end).toLocaleDateString("pt-BR")} às{" "}
-              {new Date(blockedTime.end).toLocaleTimeString("pt-BR", {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: false
-              })}
+              <strong>Email:</strong> {client.email}
+            </div>
+
+            <div>
+              <strong>Telefone:</strong> {client.phone}
             </div>
           </div>
 
           <div
             style={{
-              marginTop: "14px",
+              marginTop: "12px",
               display: "flex",
               gap: "10px",
               flexWrap: "wrap"
@@ -66,10 +59,18 @@ export default function BlockedTimeList({
           >
             <button
               type="button"
-              onClick={() => onDelete(blockedTime.id)}
+              onClick={() => onEdit(client)}
+              style={editButton}
+            >
+              Editar
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onDelete(client.id)}
               style={deleteButton}
             >
-              Excluir bloqueio
+              Excluir
             </button>
           </div>
         </div>
@@ -77,6 +78,16 @@ export default function BlockedTimeList({
     </div>
   );
 }
+
+const editButton = {
+  border: "none",
+  background: "#1976d2",
+  color: "#fff",
+  padding: "8px 12px",
+  borderRadius: "8px",
+  cursor: "pointer",
+  fontWeight: "600"
+};
 
 const deleteButton = {
   border: "none",
