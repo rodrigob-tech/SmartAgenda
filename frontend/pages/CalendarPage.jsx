@@ -345,56 +345,6 @@ const handleDeleteClient = async (id) => {
           gap: "24px"
         }}
       >
-        <div style={sectionCardStyle}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: "16px",
-              flexWrap: "wrap"
-            }}
-          >
-            <div>
-              <h1 style={{ margin: 0, fontSize: "30px" }}>Painel administrativo</h1>
-              <p style={{ margin: "8px 0 0", color: "#555" }}>
-                Gerencie clientes, espaços, agendamentos, bloqueios e calendário.
-              </p>
-            </div>
-
-            <div
-              style={{
-                background: "#eef3ff",
-                borderRadius: "12px",
-                padding: "12px 16px",
-                minWidth: "260px"
-              }}
-            >
-              <div style={{ fontSize: "14px", color: "#555" }}>Admin autenticado</div>
-              <div style={{ fontWeight: "600" }}>{admin?.name}</div>
-              <div style={{ fontSize: "14px", color: "#555" }}>{admin?.email}</div>
-
-              <button
-                type="button"
-                onClick={() => {
-                  clearUserAuth();
-                  window.location.href = "/login-admin";
-                }}
-                style={{
-                  marginTop: "10px",
-                  border: "none",
-                  background: "#d32f2f",
-                  color: "#fff",
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-                  cursor: "pointer"
-                }}
-              >
-                Sair do painel
-              </button>
-            </div>
-          </div>
-        </div>
                 <div style={sectionCardStyle}>
   <h2 style={{ marginTop: 0 }}>Calendário geral</h2>
 

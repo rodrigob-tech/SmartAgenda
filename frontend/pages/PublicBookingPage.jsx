@@ -191,36 +191,7 @@ export default function PublicBookingPage() {
               </p>
             </div>
 
-            <div
-              style={{
-                background: "#eef3ff",
-                borderRadius: "12px",
-                padding: "12px 16px",
-                minWidth: "260px"
-              }}
-            >
-              <div style={{ fontSize: "14px", color: "#555" }}>Cliente autenticado</div>
-              <div style={{ fontWeight: "600" }}>{client?.name}</div>
-              <div style={{ fontSize: "14px", color: "#555" }}>{client?.email}</div>
-              <button
-                type="button"
-                onClick={() => {
-                  clearClientAuth();
-                  window.location.href = "/login-cliente";
-                }}
-                style={{
-                  marginTop: "10px",
-                  border: "none",
-                  background: "#d32f2f",
-                  color: "#fff",
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-                  cursor: "pointer"
-                }}
-              >
-                Sair
-              </button>
-            </div>
+          
           </div>
         </div>
 
