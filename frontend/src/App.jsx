@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Link, NavLink, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import CalendarPage from "../pages/CalendarPage";
 import MyAppointmentsPage from "../pages/MyAppointmentsPage";
@@ -38,6 +38,7 @@ function AppLayout() {
   const [clientLogged, setClientLogged] = useState(false);
   const [admin, setAdmin] = useState(null);
   const [client, setClient] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setAdminLogged(isUserAuthenticated());
@@ -84,7 +85,8 @@ function AppLayout() {
                   className="nav-action-button"
                   onClick={() => {
                     clearUserAuth();
-                    window.location.href = "/login-admin";
+                    navigate("/login-admin", { replace: true });
+
                   }}
                 >
                   Sair
@@ -104,7 +106,7 @@ function AppLayout() {
                   className="nav-action-button"
                   onClick={() => {
                     clearClientAuth();
-                    window.location.href = "/login-cliente";
+                    navigate("/login-cliente", { replace: true });
                   }}
                 >
                   Sair
