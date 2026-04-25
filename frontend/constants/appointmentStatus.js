@@ -7,9 +7,9 @@ export const STATUS_COLORS = {
 };
 
 export const STATUS_OPTIONS = [
-  "scheduled",
-  "confirmed",
-  "pending",
-  "canceled",
-  "done"
+  { value: "scheduled", label: "Agendado" },
+  { value: "confirmed", label: "Confirmado" },
+  { value: "pending", label: "Pendente" },
+  { value: "canceled", label: "Cancelado" },
+  { value: "done", label: "Concluído" }
 ];

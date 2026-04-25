@@ -132,8 +132,8 @@ export default function AppointmentForm({
         style={inputStyle}
       >
         {STATUS_OPTIONS.map((status) => (
-          <option key={status} value={status}>
-            {status}
+          <option key={status.value} value={status.value}>
+            {status.label}
           </option>
         ))}
       </select>
