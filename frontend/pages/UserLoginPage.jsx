@@ -51,8 +51,6 @@ export default function UserLoginPage() {
   return (
     <div style={pageStyle}>
       <div style={cardStyle}>
-        <div style={brandStyle}>SmartAgenda</div>
-
         <h1 style={titleStyle}>Login do admin</h1>
         <p style={subtitleStyle}>
           Acesse o painel administrativo para gerenciar clientes, espaços e agendamentos.

@@ -54,7 +54,7 @@ export default function ClientLoginPage() {
         <div style={logoPanelStyle}>
           <div style={logoBoxStyle}>
             <img
-              src="frontend\src\img\logotipoSmartAgenda.png"
+              src=" ../src/img/logotipoSmartAgenda.png"
               alt="Logo SmartAgenda"
               style={logoImageStyle}
               onError={(event) => {

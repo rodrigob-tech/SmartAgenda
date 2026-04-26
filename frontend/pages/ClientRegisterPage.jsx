@@ -52,9 +52,7 @@ export default function ClientRegisterPage() {
 
   return (
     <div style={pageStyle}>
-      <div style={cardStyle}>
-        <div style={brandStyle}>SmartAgenda</div>
-
+      <div style={cardStyle}> 
         <h1 style={titleStyle}>Criar conta</h1>
         <p style={subtitleStyle}>
           Cadastre-se para agendar e acompanhar seus atendimentos.
