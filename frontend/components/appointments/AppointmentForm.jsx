@@ -172,7 +172,9 @@ const primaryButton = {
   padding: "10px 14px",
   borderRadius: "10px",
   cursor: "pointer",
-  fontWeight: "600"
+  fontWeight: "600",
+  minWidth: "170px",
+  height: "42px"
 };
 
 const secondaryButton = {

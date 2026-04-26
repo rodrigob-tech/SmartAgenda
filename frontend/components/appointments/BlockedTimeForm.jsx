@@ -58,12 +58,12 @@ export default function BlockedTimeForm({ onSubmit }) {
         required
         style={inputStyle}
       />
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-          <button type="submit" style={primaryButton}>
-            Criar bloqueio
-          </button>
-        </div>
-      
+
+      <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+        <button type="submit" style={primaryButton}>
+          Criar bloqueio
+        </button>
+      </div>
     </form>
   );
 }
@@ -77,11 +77,13 @@ const inputStyle = {
 };
 
 const primaryButton = {
-   border: "none",
+  border: "none",
   background: "#02af11",
   color: "#fff",
   padding: "10px 14px",
   borderRadius: "10px",
   cursor: "pointer",
-  fontWeight: "600"
+  fontWeight: "600",
+  minWidth: "170px",
+  height: "42px"
 };
