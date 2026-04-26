@@ -145,7 +145,7 @@ export const createAppointment = async (req, res) => {
       console.error("Erro ao enviar email de criação:", emailError);
     }
     try {
-      const GOOGLE_OWNER_USER_ID = "2ec5f4e3-6517-4f68-b968-2e496a3eb972";
+      
 
       const googleEvent = await createGoogleCalendarEvent(
         req.user.userId,
@@ -282,7 +282,7 @@ export const updateAppointment = async (req, res) => {
     });
 
     try {
-      const GOOGLE_OWNER_USER_ID = "2ec5f4e3-6517-4f68-b968-2e496a3eb972";
+      
 
       if (updatedAppointment.googleEventId) {
         await updateGoogleCalendarEvent(

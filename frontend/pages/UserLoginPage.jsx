@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { saveUserAuth } from "../src/services/userAuthStorage";
-
+import { clearClientAuth } from "../src/services/clientAuthStorage";
 
 export default function UserLoginPage() {
   const navigate = useNavigate();
@@ -11,6 +11,9 @@ export default function UserLoginPage() {
     email: "",
     password: ""
   });
+
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -25,48 +28,133 @@ export default function UserLoginPage() {
     event.preventDefault();
 
     try {
+      setError("");
+      setLoading(true);
+
       const response = await api.post("/user-auth/login", formData);
+
+      clearClientAuth();
 
       saveUserAuth({
         token: response.data.token,
         user: response.data.user
       });
 
-      alert("Login admin realizado com sucesso");
-      navigate("/");
+      navigate("/", { replace: true });
     } catch (error) {
-      alert(error.response?.data?.error || "Erro ao fazer login admin");
+      setError(error.response?.data?.error || "Erro ao fazer login admin");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div style={{ padding: "20px", maxWidth: "400px", margin: "0 auto" }}>
-      <h1>Login do painel admin</h1>
+    <div style={pageStyle}>
+      <div style={cardStyle}>
+        <div style={brandStyle}>SmartAgenda</div>
 
-      <form
-        onSubmit={handleSubmit}
-        style={{ display: "flex", flexDirection: "column", gap: "10px" }}
-      >
-        <input
-          type="email"
-          name="email"
-          placeholder="Email do admin"
-          value={formData.email}
-          onChange={handleChange}
-          required
-        />
+        <h1 style={titleStyle}>Login do admin</h1>
+        <p style={subtitleStyle}>
+          Acesse o painel administrativo para gerenciar clientes, espaços e agendamentos.
+        </p>
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Senha"
-          value={formData.password}
-          onChange={handleChange}
-          required
-        />
+        {error && <div style={errorStyle}>{error}</div>}
 
-        <button type="submit">Entrar no painel</button>
-      </form>
+        <form onSubmit={handleSubmit} style={formStyle}>
+          <input
+            type="email"
+            name="email"
+            placeholder="Email do admin"
+            value={formData.email}
+            onChange={handleChange}
+            required
+            style={inputStyle}
+          />
+
+          <input
+            type="password"
+            name="password"
+            placeholder="Senha"
+            value={formData.password}
+            onChange={handleChange}
+            required
+            style={inputStyle}
+          />
+
+          <button type="submit" disabled={loading} style={buttonStyle}>
+            {loading ? "Entrando..." : "Entrar no painel"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
+
+const pageStyle = {
+  minHeight: "calc(100vh - 80px)",
+  background: "#f5f7fb",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: "32px 20px"
+};
+
+const cardStyle = {
+  width: "100%",
+  maxWidth: "430px",
+  background: "#ffffff",
+  borderRadius: "18px",
+  padding: "30px",
+  boxShadow: "0 8px 24px rgba(0,0,0,0.08)"
+};
+
+const brandStyle = {
+  color: "#1976d2",
+  fontWeight: "800",
+  fontSize: "24px",
+  marginBottom: "18px"
+};
+
+const titleStyle = {
+  margin: 0,
+  fontSize: "28px",
+  color: "#1f2937"
+};
+
+const subtitleStyle = {
+  margin: "8px 0 22px",
+  color: "#64748b",
+  lineHeight: 1.5
+};
+
+const formStyle = {
+  display: "grid",
+  gap: "12px"
+};
+
+const inputStyle = {
+  padding: "13px",
+  borderRadius: "10px",
+  border: "1px solid #d0d7e2",
+  fontSize: "15px"
+};
+
+const buttonStyle = {
+  border: "none",
+  background: "#1976d2",
+  color: "#fff",
+  padding: "13px",
+  borderRadius: "10px",
+  cursor: "pointer",
+  fontWeight: "700",
+  fontSize: "15px"
+};
+
+const errorStyle = {
+  background: "#fdecea",
+  color: "#b42318",
+  border: "1px solid #f5c2c7",
+  borderRadius: "10px",
+  padding: "12px",
+  marginBottom: "14px"
+};

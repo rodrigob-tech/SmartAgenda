@@ -55,7 +55,7 @@ export const cancelMyAppointment = async (req, res) => {
     }
 
     try {
-      const GOOGLE_OWNER_USER_ID = "2ec5f4e3-6517-4f68-b968-2e496a3eb972";
+      
 
       if (appointment.googleEventId) {
         await deleteGoogleCalendarEvent(
